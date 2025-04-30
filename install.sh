@@ -73,6 +73,7 @@ kwallet-pam \
 kwrited \
 plasma-desktop \
 plasma-disks \
+plasma-nm \
 plasma-pa \
 powerdevil \
 sddm-kcm \
@@ -83,8 +84,12 @@ konsole \
 dolphin-plugins \
 ark \
 filelight \
-firefox
+firefox \
+reflector \
+zram-generator \
+bash-completion
 
+systemctl enable NetworkManager.service --root=/mnt
 systemctl enable sddm.service --root=/mnt
 systemctl enable fstrim.timer --root=/mnt
 
