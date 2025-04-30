@@ -61,7 +61,29 @@ COMPRESSION="zstd"
 COMPRESSION_OPTIONS=(-5 --long)
 EOF
 
-curl -sS https://raw.githubusercontent.com/alexandrubostan/archscript/refs/heads/main/kde.txt | arch-chroot /mnt pacman -S --needed -
+arch-chroot /mnt pacman -S --needed breeze-gtk \
+drkonqi \
+kde-gtk-config \
+kdeplasma-addons \
+kgamma \
+kinfocenter \
+kscreen \
+ksshaskpass \
+kwallet-pam \
+kwrited \
+plasma-desktop \
+plasma-disks \
+plasma-pa \
+powerdevil \
+sddm-kcm \
+spectacle \
+xdg-desktop-portal-kde \
+xdg-desktop-portal-gtk \
+konsole \
+dolphin-plugins \
+ark \
+filelight \
+firefox
 
 systemctl enable sddm.service --root=/mnt
 systemctl enable fstrim.timer --root=/mnt
