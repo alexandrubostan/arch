@@ -3,7 +3,8 @@
 set -eo pipefail
 
 EFI='/dev/nvme0n1p1'
-ROOT='/dev/nvme0n1p2'
+BOOT='/dev/nvme0n1p4'
+ROOT='/dev/nvme0n1p5'
 DRIVE='/dev/nvme0n1'
 EFIPART=1
 
@@ -11,6 +12,7 @@ ext4fs () {
   mkfs.ext4 "$ROOT"
   mount "$ROOT" /mnt
   mount --mkdir "$EFI" /mnt/efi
+  #mount --mkdir "$BOOT" /mnt/boot
 }
 
 ext4fs
@@ -33,7 +35,7 @@ tee -a /mnt/etc/hosts > /dev/null << EOF
 EOF
 
 echo 'archie' | tee /mnt/etc/hostname > /dev/null
-echo "rw amdgpu.ppfeaturemask=0xffffffff" | tee /mnt/etc/kernel/cmdline > /dev/null
+echo 'rw amdgpu.ppfeaturemask=0xffffffff' | tee /mnt/etc/kernel/cmdline > /dev/null
 
 echo '/dev/gpt-auto-root  /  ext4  defaults,noatime  0  1' | tee /mnt/etc/fstab > /dev/null
 
@@ -52,42 +54,15 @@ default_uki="/efi/EFI/Linux/arch-linux.efi"
 EOF
 
 tee /mnt/etc/mkinitcpio.conf > /dev/null << EOF
-MODULES=()
+MODULES=(amdgpu)
 BINARIES=()
 FILES=()
 HOOKS=(systemd autodetect microcode modconf block filesystems fsck)
 
-COMPRESSION="zstd"
-COMPRESSION_OPTIONS=(-5 --long)
+COMPRESSION="cat"
 EOF
 
-arch-chroot /mnt pacman -S --needed breeze-gtk \
-drkonqi \
-kde-gtk-config \
-kdeplasma-addons \
-kgamma \
-kinfocenter \
-kscreen \
-ksshaskpass \
-kwallet-pam \
-kwrited \
-plasma-desktop \
-plasma-disks \
-plasma-nm \
-plasma-pa \
-powerdevil \
-sddm-kcm \
-spectacle \
-xdg-desktop-portal-kde \
-xdg-desktop-portal-gtk \
-konsole \
-dolphin-plugins \
-ark \
-filelight \
-firefox \
-reflector \
-zram-generator \
-bash-completion
+arch-chroot /mnt pacman -S --needed plasma-meta konsole dolphin-plugins kate firefox filelight
 
 systemctl enable NetworkManager.service --root=/mnt
 systemctl enable sddm.service --root=/mnt
@@ -96,3 +71,5 @@ systemctl enable fstrim.timer --root=/mnt
 arch-chroot /mnt passwd
 arch-chroot /mnt useradd -m -G wheel alexb
 arch-chroot /mnt passwd alexb
+
+echo '%wheel      ALL=(ALL:ALL) ALL' | tee -a /mnt/etc/sudoers > /dev/null
