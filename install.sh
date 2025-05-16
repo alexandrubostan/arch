@@ -3,10 +3,8 @@
 set -eo pipefail
 
 EFI='/dev/nvme0n1p1'
-BOOT='/dev/nvme0n1p4'
+#BOOT='/dev/nvme0n1p4'
 ROOT='/dev/nvme0n1p5'
-DRIVE='/dev/nvme0n1'
-EFIPART=1
 
 ext4fs () {
   mkfs.ext4 "$ROOT"
@@ -35,7 +33,7 @@ tee -a /mnt/etc/hosts > /dev/null << EOF
 EOF
 
 echo 'archie' | tee /mnt/etc/hostname > /dev/null
-echo 'rw amdgpu.ppfeaturemask=0xffffffff' | tee /mnt/etc/kernel/cmdline > /dev/null
+echo 'rw amdgpu.ppfeaturemask=0xffffffff ipv6.disable=1' | tee /mnt/etc/kernel/cmdline > /dev/null
 
 echo '/dev/gpt-auto-root  /  ext4  defaults,noatime  0  1' | tee /mnt/etc/fstab > /dev/null
 
@@ -54,7 +52,7 @@ default_uki="/efi/EFI/Linux/arch-linux.efi"
 EOF
 
 tee /mnt/etc/mkinitcpio.conf > /dev/null << EOF
-MODULES=(amdgpu)
+MODULES=()
 BINARIES=()
 FILES=()
 HOOKS=(systemd autodetect microcode modconf block filesystems fsck)
@@ -62,10 +60,10 @@ HOOKS=(systemd autodetect microcode modconf block filesystems fsck)
 COMPRESSION="cat"
 EOF
 
-arch-chroot /mnt pacman -S --needed plasma-meta konsole dolphin-plugins kate firefox filelight
+arch-chroot /mnt pacman -S --needed plasma-desktop konsole dolphin-plugins kate firefox filelight
+arch-chroot /mnt pacman -S --needed --asdeps kscreen plasma-nm plasma-pa
 
 systemctl enable NetworkManager.service --root=/mnt
-systemctl enable sddm.service --root=/mnt
 systemctl enable fstrim.timer --root=/mnt
 
 arch-chroot /mnt passwd
